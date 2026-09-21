@@ -1,0 +1,46 @@
+name: Daily NST Quiz
+
+on:
+  schedule:
+    - cron: "0 22 * * *"  # 毎朝7時（JST = UTC+9）
+  workflow_dispatch:        # GitHubの画面から手動実行も可能
+
+jobs:
+  quiz:
+    runs-on: ubuntu-latest
+
+    # 出題履歴（data/history.json）をリポジトリに書き戻すために必要
+    permissions:
+      contents: write
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 依存ライブラリをインストール
+        run: pip install -r requirements.txt
+
+      - name: 3問を選んでLINEに送信
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+          QUIZ_PAGES_BASE_URL: ${{ vars.QUIZ_PAGES_BASE_URL }}
+          CHEERS_JSON: ${{ secrets.CHEERS_JSON }}
+        run: python src/main.py
+
+      - name: 出題履歴をリポジトリに書き戻す
+        run: |
+          if [ -z "$(git status --porcelain data/history.json)" ]; then
+            echo "履歴に変更はありません"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json
+          git commit -m "chore: 出題履歴を更新 ($(TZ=Asia/Tokyo date +%Y-%m-%d))"
+          git push

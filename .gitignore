@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+
+# 個人名入りの応援文は公開しない（本番は Secret の CHEERS_JSON から読む）
+data/cheers.json
