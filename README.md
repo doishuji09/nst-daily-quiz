@@ -53,6 +53,10 @@ python src/main.py             # 実際にLINEへ送る（履歴も更新され�
 ```
 
 GitHubの Actions タブから `Daily NST Quiz` を手動実行しても確認できる。
+「Run workflow」で **test にチェック**を入れると、テスト送信になる（バンク末尾の3問を送り、出題履歴は進めない）。
+```bash
+gh workflow run daily_quiz.yml -f test=true
+```
 
 ## 問題を追加・修正する
 

@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 22 * * *"  # 毎朝7時（JST = UTC+9）
   workflow_dispatch:        # GitHubの画面から手動実行も可能
+    inputs:
+      test:
+        description: "テスト送信（出題履歴を進めない）"
+        type: boolean
+        default: false
 
 jobs:
   quiz:
@@ -31,7 +36,7 @@ jobs:
           LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
           QUIZ_PAGES_BASE_URL: ${{ vars.QUIZ_PAGES_BASE_URL }}
           CHEERS_JSON: ${{ secrets.CHEERS_JSON }}
-        run: python src/main.py
+        run: python src/main.py ${{ inputs.test && '--test' || '' }}
 
       - name: 出題履歴をリポジトリに書き戻す
         run: |
